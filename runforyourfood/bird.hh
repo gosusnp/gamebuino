@@ -19,6 +19,8 @@ namespace RFYF
             _verticalOrientation = false;
             _y = random(constants::GROUND_HEIGHT, LCDHEIGHT - HEIGHT);
             _x = orientation ? LCDWIDTH : 0;
+            _hSpeed = constants::BIRD_HSPEED;
+            _vSpeed = constants::BIRD_VSPEED;
         }
 
         void draw() {
@@ -36,14 +38,16 @@ namespace RFYF
 
     private:
         void moveLeft() {
-            if (--_x < -WIDTH) {
+            _x -= _hSpeed;
+            if (_x < -WIDTH) {
                 _x = -WIDTH - 1;
             }
             changeHeight();
         }
 
         void moveRight() {
-            if (++_x > LCDWIDTH) {
+            _x += _hSpeed;
+            if (_x > LCDWIDTH) {
                 _x = LCDWIDTH + 1;
             }
             changeHeight();
@@ -51,11 +55,13 @@ namespace RFYF
 
         void changeHeight() {
             if (_verticalOrientation) {
-                if (++_y >= LCDHEIGHT - HEIGHT) {
+                _y += _vSpeed;
+                if (_y >= LCDHEIGHT - HEIGHT) {
                     _verticalOrientation = false;
                 }
             } else {
-                if (--_y <= constants::GROUND_HEIGHT) {
+                _y -= _vSpeed;
+                if (_y <= constants::GROUND_HEIGHT) {
                     _verticalOrientation = true;
                 }
             }
@@ -64,6 +70,8 @@ namespace RFYF
         Gamebuino& _gb;
         int8_t     _x;
         int8_t     _y;
+        int8_t     _hSpeed;
+        int8_t     _vSpeed;
         bool       _orientation;
         bool       _verticalOrientation;
     }; // End of class Player

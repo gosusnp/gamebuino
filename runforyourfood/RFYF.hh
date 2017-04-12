@@ -23,7 +23,7 @@ namespace RFYF
         {}
 
         void setupGame() {
-            _player = new Player(_gb, PLAYER_START_X);
+            _player = new Player(_gb, PLAYER_START_X, constants::PLAYER_HSPEED, constants::PLAYER_VSPEED);
         }
 
         void loop() {

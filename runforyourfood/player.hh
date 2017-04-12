@@ -11,10 +11,15 @@ namespace RFYF
     public:
         const int8_t HEIGHT = 8;
         const int8_t WIDTH = 5;
-        const int8_t MAX_JUMP_HEIGHT = HEIGHT;
+        const int8_t MAX_JUMP_HEIGHT = 1.5 * HEIGHT;
 
-        Player(Gamebuino& gb, int8_t x) :
-            _gb(gb), _x(x), _y(constants::GROUND_HEIGHT), _jumpState(0)
+        Player(Gamebuino& gb, int8_t x, int8_t hSpeed, int8_t vSpeed)
+            : _gb(gb)
+            , _x(x)
+            , _y(constants::GROUND_HEIGHT)
+            , _jumpState(0)
+            , _hSpeed(hSpeed)
+            , _vSpeed(vSpeed)
         {}
 
         void draw() {
@@ -31,7 +36,8 @@ namespace RFYF
         void jump() {
             if (_jumpState >= 0) {
                 _jumpState = 1;
-                if (++_y > constants::GROUND_HEIGHT + MAX_JUMP_HEIGHT) {
+                _y += _vSpeed;
+                if (_y > constants::GROUND_HEIGHT + MAX_JUMP_HEIGHT) {
                     _y = constants::GROUND_HEIGHT + MAX_JUMP_HEIGHT;
                     _jumpState = 2;
                 }
@@ -39,13 +45,15 @@ namespace RFYF
         }
 
         void moveLeft() {
-            if (--_x < 0) {
+            _x -= _hSpeed;
+            if (_x < 0) {
                 _x = 0;
             }
         }
 
         void moveRight() {
-            if (++_x > LCDWIDTH - WIDTH) {
+            _x += _hSpeed;
+            if (_x > LCDWIDTH - WIDTH) {
                 _x = LCDWIDTH - WIDTH;
             }
         }
@@ -53,16 +61,19 @@ namespace RFYF
     private:
         void fall() {
             _jumpState = -1;
-            if (--_y < constants::GROUND_HEIGHT) {
+            _y -= _vSpeed;
+            if (_y < constants::GROUND_HEIGHT) {
                 _y = constants::GROUND_HEIGHT;
                 _jumpState = 0;
             }
         }
 
         Gamebuino& _gb;
-        int8_t _x;
-        int8_t _y;
-        int8_t _jumpState;
+        int8_t     _x;
+        int8_t     _y;
+        int8_t     _jumpState;
+        int8_t     _hSpeed;
+        int8_t     _vSpeed;
     }; // End of class Player
 
 } // End of namespace RFYF
