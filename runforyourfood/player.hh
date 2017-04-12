@@ -14,7 +14,7 @@ namespace RFYF
         const int8_t MAX_JUMP_HEIGHT = HEIGHT;
 
         Player(Gamebuino& gb, int8_t x) :
-            _gb(gb), _x(x), _y(0), _jumpState(0)
+            _gb(gb), _x(x), _y(constants::GROUND_HEIGHT), _jumpState(0)
         {}
 
         void draw() {
@@ -25,14 +25,14 @@ namespace RFYF
             } else if (_jumpState > 0) { // We were jumping, keep that in mind
                 _jumpState = 3;
             }
-            _gb.display.fillRect(_x, LCDHEIGHT - constants::GROUND_HEIGHT - HEIGHT - _y, WIDTH, HEIGHT);
+            _gb.display.fillRect(_x, LCDHEIGHT - HEIGHT - _y, WIDTH, HEIGHT);
         }
 
         void jump() {
             if (_jumpState >= 0) {
                 _jumpState = 1;
-                if (++_y > MAX_JUMP_HEIGHT) {
-                    _y = MAX_JUMP_HEIGHT;
+                if (++_y > constants::GROUND_HEIGHT + MAX_JUMP_HEIGHT) {
+                    _y = constants::GROUND_HEIGHT + MAX_JUMP_HEIGHT;
                     _jumpState = 2;
                 }
             }
@@ -53,8 +53,8 @@ namespace RFYF
     private:
         void fall() {
             _jumpState = -1;
-            if (--_y < 0) {
-                _y = 0;
+            if (--_y < constants::GROUND_HEIGHT) {
+                _y = constants::GROUND_HEIGHT;
                 _jumpState = 0;
             }
         }

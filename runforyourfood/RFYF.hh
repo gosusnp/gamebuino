@@ -4,6 +4,7 @@
 # include <Gamebuino.h>
 # include "constants.hh"
 # include "player.hh"
+# include "bird.hh"
 
 namespace RFYF
 {
@@ -18,6 +19,7 @@ namespace RFYF
         RunForYourFood(Gamebuino& gb)
         : _gb(gb)
         , _player(0)
+        , _bird(0)
         {}
 
         void setupGame() {
@@ -30,6 +32,14 @@ namespace RFYF
         }
 
         void update() {
+            // Let's see if we need to add a bird
+            if (!_bird) {
+                _bird = new Bird(_gb, random(0, 10) % 2);
+            } else if (_bird->isOut()) {
+                delete _bird;
+                _bird = 0;
+            }
+
             // Player actions
             if (_gb.buttons.repeat(BTN_LEFT, 1)) {
                 _player->moveLeft();
@@ -44,13 +54,20 @@ namespace RFYF
         void drawScene() {
             // Draw the ground
             _gb.display.fillRect(0, LCDHEIGHT - constants::GROUND_HEIGHT, LCDWIDTH, 1);
+
             // Draw the player
             _player->draw();
+
+            // Draw the bird if needed
+            if (_bird) {
+                _bird->draw();
+            }
         }
 
     private:
         Gamebuino&  _gb;
         Player*     _player;
+        Bird*       _bird;
     }; // End of class RunForYourFood
 
 } // End of namespace RFYF
