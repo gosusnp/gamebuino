@@ -17,8 +17,13 @@ namespace RFYF
             const int8_t WIDTH = 5;
         } // End of namespace player
 
-        const int8_t BIRD_HSPEED = 2;
-        const int8_t BIRD_VSPEED = 1;
+        namespace bird
+        {
+            const int8_t HSPEED = 2;
+            const int8_t VSPEED = 1;
+            const int8_t HEIGHT = 3;
+            const int8_t WIDTH = 6;
+        } // End of namespace bird
 
     } // End of namespace constants
 

@@ -6,41 +6,49 @@
 
 namespace RFYF
 {
+    const byte birdBitmaps[][11] PROGMEM = {
+        {
+          constants::bird::WIDTH, constants::bird::HEIGHT,
+          0b000110000,
+          0b011111100,
+          0b001110000,
+        }
+    };
+
     class Bird
     {
     public:
-        const int8_t HEIGHT = 3;
-        const int8_t WIDTH = 6;
-
         Bird(Gamebuino& gb, bool orientation)
         : _gb(gb)
         {
             _orientation = orientation;
             _verticalOrientation = false;
-            _y = random(constants::GROUND_HEIGHT, LCDHEIGHT - HEIGHT);
+            _y = random(constants::GROUND_HEIGHT, LCDHEIGHT - constants::bird::HEIGHT);
             _x = orientation ? LCDWIDTH : 0;
-            _hSpeed = constants::BIRD_HSPEED;
-            _vSpeed = constants::BIRD_VSPEED;
+            _hSpeed = constants::bird::HSPEED;
+            _vSpeed = constants::bird::VSPEED;
         }
 
         void draw() {
             if (_orientation) {
                 moveLeft();
+                _gb.display.drawBitmap(_x, LCDHEIGHT - constants::bird::HEIGHT - _y, birdBitmaps[0]);
             } else {
                 moveRight();
+                _gb.display.drawBitmap(_x, LCDHEIGHT - constants::bird::HEIGHT - _y, birdBitmaps[0], NOROT, FLIPH);
             }
-            _gb.display.fillRect(_x, LCDHEIGHT - HEIGHT - _y, WIDTH, HEIGHT);
+            //_gb.display.fillRect(_x, LCDHEIGHT - constants::bird::HEIGHT - _y, constants::bird::WIDTH, constants::bird::HEIGHT);
         }
 
         bool isOut() {
-            return _x < -WIDTH || _x > LCDWIDTH;
+            return _x < -constants::bird::WIDTH || _x > LCDWIDTH;
         }
 
     private:
         void moveLeft() {
             _x -= _hSpeed;
-            if (_x < -WIDTH) {
-                _x = -WIDTH - 1;
+            if (_x < -constants::bird::WIDTH) {
+                _x = -constants::bird::WIDTH - 1;
             }
             changeHeight();
         }
@@ -56,7 +64,7 @@ namespace RFYF
         void changeHeight() {
             if (_verticalOrientation) {
                 _y += _vSpeed;
-                if (_y >= LCDHEIGHT - HEIGHT) {
+                if (_y >= LCDHEIGHT - constants::bird::HEIGHT) {
                     _verticalOrientation = false;
                 }
             } else {
