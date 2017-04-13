@@ -41,13 +41,16 @@ namespace RFYF
             }
 
             // Player actions
+            if (_gb.buttons.repeat(BTN_A, 1)) {
+                _player->jump();
+            }
+            if (_gb.buttons.repeat(BTN_B, 1)) {
+                _player->kick();
+            }
             if (_gb.buttons.repeat(BTN_LEFT, 1)) {
                 _player->moveLeft();
             } else if (_gb.buttons.repeat(BTN_RIGHT, 1)) {
                 _player->moveRight();
-            }
-            if (_gb.buttons.repeat(BTN_A, 1)) {
-                _player->jump();
             }
         }
 

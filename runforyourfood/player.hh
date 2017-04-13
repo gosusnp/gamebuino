@@ -50,7 +50,18 @@ namespace RFYF
           0b001000000,
           0b001000000,
           0b010100000,
+          0b000100000,
+        }, { // Kick
+          constants::player::WIDTH, constants::player::HEIGHT,
+          0b011100000,
           0b010100000,
+          0b011100000,
+          0b001000000,
+          0b011100000,
+          0b001000000,
+          0b001111000,
+          0b010000000,
+          0b010000000,
         }
     };
 
@@ -68,6 +79,7 @@ namespace RFYF
             , _vSpeed(vSpeed)
             , _drawAction(0)
             , _drawFrame(0)
+            , _kick(0)
         {}
 
         void draw() {
@@ -78,16 +90,25 @@ namespace RFYF
             } else if (_jumpState > 0) { // We were jumping, keep that in mind
                 _jumpState = 3;
             }
-            if (_drawAction == 0) { // stading still looking to the right
-                _gb.display.drawBitmap(_x, LCDHEIGHT - constants::player::HEIGHT - _y, playerBitmaps[_jumpState ? 2 : 0]);
-                _drawFrame = 0;
-            } else if (_drawAction == 1) { // standing still looking to the left
-                _gb.display.drawBitmap(_x, LCDHEIGHT - constants::player::HEIGHT - _y, playerBitmaps[_jumpState ? 2 : 0], NOROT, FLIPH);
-                _drawFrame = 0;
-            } else if (_drawAction == 2) { // run right
-                _gb.display.drawBitmap(_x, LCDHEIGHT - constants::player::HEIGHT - _y, playerBitmaps[_jumpState ? 2 : _drawFrame++]);
-            } else if (_drawAction == 3) { // run left
-                _gb.display.drawBitmap(_x, LCDHEIGHT - constants::player::HEIGHT - _y, playerBitmaps[_jumpState ? 2 : _drawFrame++], NOROT, FLIPH);
+
+            if (_kick > 0) {
+                --_kick;
+                _drawAction = (_drawAction % 2) + 4;
+            }
+
+            if (!(_drawAction % 2)) { // going right
+                _gb.display.drawBitmap(_x, LCDHEIGHT - constants::player::HEIGHT - _y, getFrame());
+            } else if (_drawAction % 2) { // going left
+                _gb.display.drawBitmap(_x, LCDHEIGHT - constants::player::HEIGHT - _y, getFrame(), NOROT, FLIPH);
+            }
+            switch (_drawAction) {
+                case 0:
+                case 1:
+                    _drawFrame = 0;
+                    break;
+                case 2:
+                case 3:
+                    ++_drawFrame;
             }
             if (_drawFrame > 3) {
                 _drawFrame = 0;
@@ -106,7 +127,16 @@ namespace RFYF
             }
         }
 
+        void kick() {
+            if (_kick == 0) {
+                _kick = 2;
+            }
+        }
+
         void moveLeft() {
+            if (_kick && !_jumpState) {
+                return;
+            }
             _x -= _hSpeed;
             _drawAction = 3;
             if (_x < 0) {
@@ -116,6 +146,9 @@ namespace RFYF
         }
 
         void moveRight() {
+            if (_kick && !_jumpState) {
+                return;
+            }
             _x += _hSpeed;
             _drawAction = 2;
             if (_x > LCDWIDTH - constants::player::WIDTH) {
@@ -134,6 +167,29 @@ namespace RFYF
             }
         }
 
+        const byte* getFrame() {
+            int8_t frame = 0;
+            if (_jumpState) {
+                frame = _kick ? 4 : 2;
+            } else {
+                switch (_drawAction) {
+                    case 0:
+                    case 1:
+                        frame = 0;
+                        break;
+                    case 2:
+                    case 3:
+                        frame = _drawFrame;
+                        break;
+                    case 4:
+                    case 5:
+                        frame = 4;
+                        break;
+                }
+            }
+            return playerBitmaps[frame];
+        }
+
         Gamebuino& _gb;
         int8_t     _x;
         int8_t     _y;
@@ -142,6 +198,7 @@ namespace RFYF
         int8_t     _vSpeed;
         int8_t     _drawAction;
         int8_t     _drawFrame;
+        int8_t     _kick;
     }; // End of class Player
 
 } // End of namespace RFYF
