@@ -52,6 +52,11 @@ namespace RFYF
             } else if (_gb.buttons.repeat(BTN_RIGHT, 1)) {
                 _player->moveRight();
             }
+
+            _player->update();
+            if (_bird) {
+                _bird->update();
+            }
         }
 
         void drawScene() {

@@ -29,15 +29,20 @@ namespace RFYF
             _vSpeed = constants::bird::VSPEED;
         }
 
-        void draw() {
+        void update() {
             if (_orientation) {
                 moveLeft();
-                _gb.display.drawBitmap(_x, LCDHEIGHT - constants::bird::HEIGHT - _y, birdBitmaps[0]);
             } else {
                 moveRight();
+            }
+        }
+
+        void draw() {
+            if (_orientation) {
+                _gb.display.drawBitmap(_x, LCDHEIGHT - constants::bird::HEIGHT - _y, birdBitmaps[0]);
+            } else {
                 _gb.display.drawBitmap(_x, LCDHEIGHT - constants::bird::HEIGHT - _y, birdBitmaps[0], NOROT, FLIPH);
             }
-            //_gb.display.fillRect(_x, LCDHEIGHT - constants::bird::HEIGHT - _y, constants::bird::WIDTH, constants::bird::HEIGHT);
         }
 
         bool isOut() {

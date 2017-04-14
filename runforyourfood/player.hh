@@ -82,7 +82,7 @@ namespace RFYF
             , _kick(0)
         {}
 
-        void draw() {
+        void update() {
             if (_jumpState < 0 || _jumpState == 3) { // We were falling before or stopped jumping, let's keep falling
                 fall();
             } else if (_jumpState == 2) { // We just reached the top, let's make sure we fall next tick
@@ -95,7 +95,9 @@ namespace RFYF
                 --_kick;
                 _drawAction = (_drawAction % 2) + 4;
             }
+        }
 
+        void draw() {
             if (!(_drawAction % 2)) { // going right
                 _gb.display.drawBitmap(_x, LCDHEIGHT - constants::player::HEIGHT - _y, getFrame());
             } else if (_drawAction % 2) { // going left
