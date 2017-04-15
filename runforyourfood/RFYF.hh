@@ -6,6 +6,8 @@
 # include "player.hh"
 # include "bird.hh"
 
+extern const byte font5x7[]; //get the default large font
+
 namespace RFYF
 {
 
@@ -22,8 +24,13 @@ namespace RFYF
         , _bird(0)
         {}
 
-        void setupGame() {
-            _player = new Player(_gb, PLAYER_START_X, constants::player::HSPEED, constants::player::VSPEED);
+        void titleScreen() {
+            _gb.display.setFont(font5x7); //change the font to the large one
+            _gb.titleScreen(F("RunForYourFood"));
+            if (_player) {
+                delete _player;
+                _player = 0;
+            }
         }
 
         void loop() {
@@ -32,6 +39,10 @@ namespace RFYF
         }
 
         void update() {
+            // Let's see if we need to add a player
+            if (!_player) {
+                _player = new Player(_gb, PLAYER_START_X, constants::player::HSPEED, constants::player::VSPEED);
+            }
             // Let's see if we need to add a bird
             if (!_bird) {
                 _bird = new Bird(_gb, random(0, 10) % 2);
@@ -56,6 +67,14 @@ namespace RFYF
             _player->update();
             if (_bird) {
                 _bird->update();
+
+                // Check if collide
+                if (_player->kicked(*_bird)) {
+                    delete _bird;
+                    _bird = 0;
+                } else if (_player->collide(*_bird)) {
+                    titleScreen();
+                }
             }
         }
 

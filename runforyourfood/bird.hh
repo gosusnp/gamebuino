@@ -3,6 +3,7 @@
 
 # include <Gamebuino.h>
 # include "constants.hh"
+# include "drawable.hh"
 
 namespace RFYF
 {
@@ -11,43 +12,42 @@ namespace RFYF
           constants::bird::WIDTH, constants::bird::HEIGHT,
           0b000110000,
           0b011111100,
+          0b000111000,
+        }, {
+          constants::bird::WIDTH, constants::bird::HEIGHT,
+          0b000110000,
+          0b011111100,
           0b001110000,
         }
     };
 
-    class Bird
+    class Bird : public Drawable
     {
     public:
         Bird(Gamebuino& gb, bool orientation)
-        : _gb(gb)
+        : Drawable(gb, constants::bird::WIDTH, constants::bird::HEIGHT, orientation ? LCDWIDTH : 0, random(constants::GROUND_HEIGHT, LCDHEIGHT - constants::bird::HEIGHT))
         {
             _orientation = orientation;
             _verticalOrientation = false;
-            _y = random(constants::GROUND_HEIGHT, LCDHEIGHT - constants::bird::HEIGHT);
-            _x = orientation ? LCDWIDTH : 0;
             _hSpeed = constants::bird::HSPEED;
             _vSpeed = constants::bird::VSPEED;
         }
 
         void update() {
-            if (_orientation) {
+            if (orientation()) {
                 moveLeft();
             } else {
                 moveRight();
             }
         }
 
-        void draw() {
-            if (_orientation) {
-                _gb.display.drawBitmap(_x, LCDHEIGHT - constants::bird::HEIGHT - _y, birdBitmaps[0]);
-            } else {
-                _gb.display.drawBitmap(_x, LCDHEIGHT - constants::bird::HEIGHT - _y, birdBitmaps[0], NOROT, FLIPH);
-            }
-        }
-
         bool isOut() {
             return _x < -constants::bird::WIDTH || _x > LCDWIDTH;
         }
+
+        bool orientation() { return _orientation; }
+
+        const byte* getFrame() { return birdBitmaps[orientation()]; }
 
     private:
         void moveLeft() {
@@ -80,9 +80,6 @@ namespace RFYF
             }
         }
 
-        Gamebuino& _gb;
-        int8_t     _x;
-        int8_t     _y;
         int8_t     _hSpeed;
         int8_t     _vSpeed;
         bool       _orientation;

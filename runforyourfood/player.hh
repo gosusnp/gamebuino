@@ -3,6 +3,7 @@
 
 # include <Gamebuino.h>
 # include "constants.hh"
+# include "drawable.hh"
 
 namespace RFYF
 {
@@ -62,18 +63,117 @@ namespace RFYF
           0b001111000,
           0b010000000,
           0b010000000,
+        }, { // Kick (body)
+          constants::player::WIDTH, constants::player::HEIGHT,
+          0b011100000,
+          0b010100000,
+          0b011100000,
+          0b001000000,
+          0b011100000,
+          0b001000000,
+          0b001000000,
+          0b010000000,
+          0b010000000,
+        }, { // Kick (leg)
+          constants::player::WIDTH, constants::player::HEIGHT,
+          0b000000000,
+          0b000000000,
+          0b000000000,
+          0b000000000,
+          0b000000000,
+          0b000000000,
+          0b000111000,
+          0b000000000,
+          0b000000000,
         }
     };
-
-    class Player
+    const byte playerReversedBitmaps[][11] PROGMEM = {
+        {
+          constants::player::WIDTH, constants::player::HEIGHT,
+          0b000111000,
+          0b000101000,
+          0b000111000,
+          0b000010000,
+          0b001110000,
+          0b000010000,
+          0b000010000,
+          0b000010000,
+          0b000010000,
+        }, {
+          constants::player::WIDTH, constants::player::HEIGHT,
+          0b000111000,
+          0b000101000,
+          0b000111000,
+          0b000010000,
+          0b001110000,
+          0b000010000,
+          0b000110000,
+          0b000011000,
+          0b000010000,
+        }, {
+          constants::player::WIDTH, constants::player::HEIGHT,
+          0b000111000,
+          0b000101000,
+          0b000111000,
+          0b000010000,
+          0b001110000,
+          0b000010000,
+          0b000110000,
+          0b000101000,
+          0b000001000,
+        }, {
+          constants::player::WIDTH, constants::player::HEIGHT,
+          0b000111000,
+          0b000101000,
+          0b000111000,
+          0b000010000,
+          0b001110000,
+          0b000010000,
+          0b000010000,
+          0b000101000,
+          0b000100000,
+        }, { // Kick
+          constants::player::WIDTH, constants::player::HEIGHT,
+          0b000111000,
+          0b000101000,
+          0b000111000,
+          0b000010000,
+          0b000111000,
+          0b000010000,
+          0b011110000,
+          0b000001000,
+          0b000001000,
+        }, { // Kick (body)
+          constants::player::WIDTH, constants::player::HEIGHT,
+          0b000111000,
+          0b000101000,
+          0b000111000,
+          0b000010000,
+          0b000111000,
+          0b000010000,
+          0b000010000,
+          0b000001000,
+          0b000001000,
+        }, { // Kick (leg)
+          constants::player::WIDTH, constants::player::HEIGHT,
+          0b000000000,
+          0b000000000,
+          0b000000000,
+          0b000000000,
+          0b000000000,
+          0b000000000,
+          0b011100000,
+          0b000000000,
+          0b000000000,
+        }
+    };
+    class Player : public Drawable
     {
     public:
         const int8_t MAX_JUMP_HEIGHT = 1.5 * constants::player::HEIGHT;
 
         Player(Gamebuino& gb, int8_t x, int8_t hSpeed, int8_t vSpeed)
-            : _gb(gb)
-            , _x(x)
-            , _y(constants::GROUND_HEIGHT)
+            : Drawable(gb, constants::player::WIDTH, constants::player::HEIGHT, x, constants::GROUND_HEIGHT)
             , _jumpState(0)
             , _hSpeed(hSpeed)
             , _vSpeed(vSpeed)
@@ -98,11 +198,7 @@ namespace RFYF
         }
 
         void draw() {
-            if (!(_drawAction % 2)) { // going right
-                _gb.display.drawBitmap(_x, LCDHEIGHT - constants::player::HEIGHT - _y, getFrame());
-            } else if (_drawAction % 2) { // going left
-                _gb.display.drawBitmap(_x, LCDHEIGHT - constants::player::HEIGHT - _y, getFrame(), NOROT, FLIPH);
-            }
+            Drawable::draw();
             switch (_drawAction) {
                 case 0:
                 case 1:
@@ -159,15 +255,18 @@ namespace RFYF
             }
         }
 
-    private:
-        void fall() {
-            _jumpState = -1;
-            _y -= _vSpeed;
-            if (_y < constants::GROUND_HEIGHT) {
-                _y = constants::GROUND_HEIGHT;
-                _jumpState = 0;
-            }
+        bool kicked(Drawable& other) {
+            return _kick &&
+                   _gb.collideBitmapBitmap(getLeft(), getBottom(),
+                                           orientation() ? playerBitmaps[6] : playerReversedBitmaps[6],
+                                           other.getLeft(), other.getBottom(), other.getFrame());
         }
+        bool collide(Drawable& other) {
+            return _gb.collideBitmapBitmap(getLeft(), getBottom(), getFrame(),
+                                           other.getLeft(), other.getBottom(), other.getFrame());
+        }
+
+        bool orientation() { return !(_drawAction % 2); }
 
         const byte* getFrame() {
             int8_t frame = 0;
@@ -189,12 +288,19 @@ namespace RFYF
                         break;
                 }
             }
-            return playerBitmaps[frame];
+            return orientation() ? playerBitmaps[frame] : playerReversedBitmaps[frame];
         }
 
-        Gamebuino& _gb;
-        int8_t     _x;
-        int8_t     _y;
+    private:
+        void fall() {
+            _jumpState = -1;
+            _y -= _vSpeed;
+            if (_y < constants::GROUND_HEIGHT) {
+                _y = constants::GROUND_HEIGHT;
+                _jumpState = 0;
+            }
+        }
+
         int8_t     _jumpState;
         int8_t     _hSpeed;
         int8_t     _vSpeed;
