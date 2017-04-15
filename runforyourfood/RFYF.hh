@@ -20,22 +20,17 @@ namespace RFYF
     public:
         RunForYourFood(Gamebuino& gb)
         : _gb(gb)
+        , _score(0)
         , _player(0)
         , _bird(0)
         {}
 
-        void titleScreen() {
-            _gb.display.setFont(font5x7); //change the font to the large one
-            _gb.titleScreen(F("RunForYourFood"));
-            if (_player) {
-                delete _player;
-                _player = 0;
-            }
-        }
-
         void loop() {
-            update();
-            drawScene();
+            if (_gb.update()) {
+                update();
+                drawScene();
+                drawScore();
+            }
         }
 
         void update() {
@@ -49,6 +44,7 @@ namespace RFYF
             } else if (_bird->isOut()) {
                 delete _bird;
                 _bird = 0;
+                ++_score;
             }
 
             // Player actions
@@ -72,8 +68,11 @@ namespace RFYF
                 if (_player->kicked(*_bird)) {
                     delete _bird;
                     _bird = 0;
+                    _score += 5;
                 } else if (_player->collide(*_bird)) {
-                    titleScreen();
+                    delete _player;
+                    _player = 0;
+                    _score = 0;
                 }
             }
         }
@@ -83,7 +82,9 @@ namespace RFYF
             _gb.display.fillRect(0, LCDHEIGHT - constants::GROUND_HEIGHT, LCDWIDTH, 1);
 
             // Draw the player
-            _player->draw();
+            if (_player) {
+                _player->draw();
+            }
 
             // Draw the bird if needed
             if (_bird) {
@@ -91,8 +92,16 @@ namespace RFYF
             }
         }
 
+        void drawScore() {
+            _gb.display.fontSize = 1;
+            _gb.display.cursorX = LCDWIDTH - 10 - (_score > 9 ? 5 : 0) - (_score > 99 ? 5 : 0);
+            _gb.display.cursorY = 5;
+            _gb.display.print(_score);
+        }
+
     private:
         Gamebuino&  _gb;
+        int8_t      _score;
         Player*     _player;
         Bird*       _bird;
     }; // End of class RunForYourFood
